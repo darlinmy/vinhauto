@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+import time
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -77,13 +78,19 @@ def ingest_documents():
             model="models/gemini-embedding-001",
             google_api_key=api_key
         )
-        
-        # Create and persist the vector store
-        vector_store = Chroma.from_documents(
-            documents=pdf_chunks,
-            embedding=embeddings,
+        vector_store = Chroma(
+            embedding_function=embeddings,
             persist_directory=CHROMA_DIR
         )
+        
+        print("[*] Bắt đầu đẩy dữ liệu lên ChromaDB (Có áp dụng nhịp nghỉ 4s để tránh lỗi API)...")
+        # Dùng vòng lặp đẩy từng chunk một lên API
+        for i, chunk in enumerate(pdf_chunks):
+            vector_store.add_documents([chunk])
+            print(f"    - Đã nhúng đoạn {i + 1}/{len(pdf_chunks)}")
+            time.sleep(4) # Nghỉ 4 giây trước khi đẩy đoạn tiếp theo
+            
+
         print(f"[+] Success: ChromaDB created and saved at: {CHROMA_DIR}")
     except Exception as e:
         print(f"[-] Ingestion failed: {str(e)}")
