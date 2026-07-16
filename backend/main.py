@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, HTMLResponse
@@ -46,8 +47,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class ChatMessage(BaseModel):
+    sender: str
+    text: str
+
 class ChatRequest(BaseModel):
     message: str
+    history: Optional[List[ChatMessage]] = []
 
 @app.get("/api/health")
 async def health_check():
@@ -62,10 +68,10 @@ async def chat_endpoint(request: ChatRequest):
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
         
-    print(f"[*] Received chat request: {request.message}")
+    print(f"[*] Received chat request: {request.message} (history length: {len(request.history or [])})")
     
     return StreamingResponse(
-        stream_rag(request.message),
+        stream_rag(request.message, request.history),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

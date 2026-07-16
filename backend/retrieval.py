@@ -2,11 +2,13 @@ import os
 import json
 import csv
 import re
+from typing import List, Optional
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_chroma import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.documents import Document
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 # Load environment variables
 load_dotenv()
@@ -68,22 +70,29 @@ llm = ChatGoogleGenerativeAI(
 
 # 4. Create RAG Prompts
 SYSTEM_PROMPT = (
-    "Bạn là một chuyên gia kỹ thuật ô tô và trợ lý thông minh của garage Vinh Auto.\n"
-    "Nhiệm vụ của bạn là hỗ trợ khách hàng trả lời các câu hỏi về ô tô một cách nhiệt tình, chính xác và chuyên nghiệp.\n\n"
-    "Hướng dẫn trả lời:\n"
-    "1. Nếu câu hỏi liên quan đến thông tin kỹ thuật chi tiết của các dòng xe có trong dữ liệu tham khảo dưới đây, hãy ưu tiên sử dụng thông tin trong tài liệu đó.\n"
-    "2. Nếu câu hỏi là các câu hỏi cơ bản, câu hỏi xã giao (như chào hỏi, cảm ơn), hoặc các câu hỏi kiến thức chung về ô tô không nằm trong dữ liệu tham khảo, hãy sử dụng kiến thức chuyên môn rộng lớn của bạn về kỹ thuật ô tô để trả lời trực tiếp một cách đầy đủ và hữu ích cho khách hàng. Không được từ chối trả lời hoặc bắt khách hàng liên hệ kỹ thuật viên đối với các câu hỏi kiến thức chung này.\n"
-    "3. Chỉ khi khách hàng hỏi về các thông tin kỹ thuật quá đặc thù, sơ đồ mạch điện chi tiết, hoặc quy trình sửa chữa phức tạp của một dòng xe cụ thể mà KHÔNG có trong dữ liệu tham khảo, bạn mới lịch sự khuyên họ liên hệ trực tiếp với kỹ thuật viên của garage Vinh Auto để được hỗ trợ kiểm tra thực tế.\n\n"
+    "Bạn là một chuyên gia kỹ thuật ô tô và cố vấn dịch vụ thông minh của garage Vinh Auto.\n"
+    "Nhiệm vụ của bạn là hỗ trợ khách hàng và kỹ thuật viên chẩn đoán sự cố, tra cứu tài liệu và bảo dưỡng ô tô.\n\n"
+    "HƯỚNG DẪN TRẢ LỜI CHẨN ĐOÁN & KỸ THUẬT:\n"
+    "Khi trả lời về sự cố kỹ thuật hoặc mã lỗi (OBD-II), hãy trình bày rõ ràng theo cấu trúc chuyên nghiệp sau:\n"
+    "1. **Giải thích sự cố / mã lỗi**: Nêu rõ ý nghĩa, mức độ nghiêm trọng và ảnh hưởng của nó đến vận hành xe.\n"
+    "2. **Nguyên nhân phổ biến**: Liệt kê các nguyên nhân gây ra lỗi từ phổ biến nhất đến ít phổ biến hơn (với các chi tiết kỹ thuật cụ thể).\n"
+    "3. **Quy trình kiểm tra / Chẩn đoán gợi ý**: Hướng dẫn các bước đo đạc, kiểm tra cơ bản hoặc chuyên sâu (sử dụng đồng hồ vạn năng, máy quét lỗi, kiểm tra trực quan, v.v.).\n"
+    "4. **Giải pháp khắc phục & Bảo dưỡng**: Đưa ra hướng xử lý thích hợp, các vật tư linh kiện cần thay thế hoặc kiểm tra định kỳ (tham khảo lịch bảo dưỡng hoặc TSB nếu có).\n\n"
+    "HƯỚNG DẪN SỬ DỤNG NGỮ CẢNH & THÔNG TIN:\n"
+    "- Ưu tiên sử dụng thông tin kỹ thuật chính xác từ tài liệu tham khảo được cung cấp bên dưới (ví dụ: Lịch bảo dưỡng Ford Ranger, Bản tin TSB).\n"
+    "- Nếu câu hỏi là về các kiến thức ô tô chung hoặc câu xã giao ngoài tài liệu, hãy dùng chuyên môn sâu của bạn về kỹ thuật ô tô để giải đáp nhiệt tình, cụ thể, không từ chối hoặc đùn đẩy.\n"
+    "- Chỉ khi gặp câu hỏi cực kỳ đặc thù, sơ đồ mạch chi tiết hoặc lỗi phần cứng phức tạp của dòng xe nằm ngoài tài liệu, mới khuyên khách hàng đưa xe đến Vinh Auto để kỹ thuật viên kiểm tra trực tiếp.\n\n"
     "Dữ liệu kỹ thuật tham khảo:\n"
     "---------------------\n"
     "{context}\n"
     "---------------------\n"
 )
 
-prompt_template = ChatPromptTemplate.from_messages([
-    ("system", SYSTEM_PROMPT),
-    ("human", "{question}")
-])
+CONDENSE_QUESTION_SYSTEM_PROMPT = (
+    "Cho lịch sử cuộc trò chuyện dưới đây và một câu hỏi mới nhất từ người dùng, "
+    "hãy tạo ra một câu hỏi độc lập (standalone question) bằng tiếng Việt có đầy đủ ngữ cảnh để có thể hiểu được mà không cần xem lịch sử cuộc trò chuyện (đặc biệt cần giữ lại các mã lỗi OBD-II hoặc tên xe nếu có đề cập ở trước).\n"
+    "KHÔNG trả lời câu hỏi đó, chỉ viết lại câu hỏi đó nếu cần thiết, ngược lại giữ nguyên câu hỏi ban đầu."
+)
 
 def is_conversational_query(query: str) -> bool:
     """Detects if a query is a greeting, basic social message, or very short phrase to skip vector search."""
@@ -118,17 +127,42 @@ def format_docs(docs):
         formatted.append(f"[Tài liệu {i+1}]: {source} ({page_str})\nNội dung: {doc.page_content}")
     return "\n\n".join(formatted)
 
-async def stream_rag(question: str):
+async def stream_rag(question: str, history: Optional[List] = None):
     """
-    Asynchronously retrieves relevant chunks and streams LLM response.
+    Asynchronously retrieves relevant chunks and streams LLM response,
+    taking into account the conversation history for multi-turn capability.
     Yields Server-Sent Events (SSE) structured JSON:
     1. First event: sources retrieved from vector store and/or CSV exact lookup
     2. Sub-sequent events: response tokens as they are generated from gemini-3.5-flash
     """
+    if history is None:
+        history = []
+
     try:
-        # A. Perform Exact OBD-II Code Lookup using regex
+        # A. Condense/Rephrase the user's latest question if history is present
+        search_query = question
+        if len(history) > 0 and not is_conversational_query(question):
+            rephrase_messages = [SystemMessage(content=CONDENSE_QUESTION_SYSTEM_PROMPT)]
+            for msg in history:
+                sender = msg.get("sender") if isinstance(msg, dict) else getattr(msg, "sender", None)
+                text = msg.get("text") if isinstance(msg, dict) else getattr(msg, "text", None)
+                if sender == "user":
+                    rephrase_messages.append(HumanMessage(content=text))
+                elif sender == "bot":
+                    rephrase_messages.append(AIMessage(content=text))
+            rephrase_messages.append(HumanMessage(content=question))
+            
+            try:
+                rephrase_response = await llm.ainvoke(rephrase_messages)
+                search_query = rephrase_response.content.strip()
+                print(f"[*] Rephrased '{question}' -> '{search_query}'")
+            except Exception as rephrase_err:
+                print(f"[-] Error rephrasing question: {str(rephrase_err)}")
+                search_query = question
+
+        # B. Perform Exact OBD-II Code Lookup using regex on the search query
         obd_docs = []
-        found_codes = re.findall(r'\b[P|C|B|U]\d{4}\b|\b[P|C|B|U]\d[A-F0-9]\d{2}\b', question.upper())
+        found_codes = re.findall(r'\b[P|C|B|U]\d{4}\b|\b[P|C|B|U]\d[A-F0-9]\d{2}\b', search_query.upper())
         found_codes = list(set(found_codes))  # De-duplicate codes
         
         for code in found_codes:
@@ -141,13 +175,13 @@ async def stream_rag(question: str):
                 ))
                 print(f"[+] Exact match found for OBD-II code: {code}")
 
-        # B. Retrieve relevant documents from Chroma vector store (PDF manuals)
+        # C. Retrieve relevant documents from Chroma vector store (PDF manuals)
         # Skip vector DB retrieval for simple greetings/conversational queries to improve response speed
-        if is_conversational_query(question) and not obd_docs:
+        if is_conversational_query(search_query) and not obd_docs:
             docs = []
-            print(f"[*] Conversational query detected: '{question}'. Skipping vector search.")
+            print(f"[*] Conversational query detected: '{search_query}'. Skipping vector search.")
         else:
-            docs = await retriever.ainvoke(question)
+            docs = await retriever.ainvoke(search_query)
         
         # Combine both OBD-II lookup documents and PDF manual chunks
         all_docs = obd_docs + list(docs)
@@ -168,10 +202,20 @@ async def stream_rag(question: str):
         
         # Build prompt with formatted context
         context = format_docs(all_docs)
-        messages = prompt_template.format_messages(context=context, question=question)
+        
+        # Construct dynamic list of messages for LLM inference
+        inference_messages = [SystemMessage(content=SYSTEM_PROMPT.format(context=context))]
+        for msg in history:
+            sender = msg.get("sender") if isinstance(msg, dict) else getattr(msg, "sender", None)
+            text = msg.get("text") if isinstance(msg, dict) else getattr(msg, "text", None)
+            if sender == "user":
+                inference_messages.append(HumanMessage(content=text))
+            elif sender == "bot":
+                inference_messages.append(AIMessage(content=text))
+        inference_messages.append(HumanMessage(content=question))
         
         # Stream response chunks from LLM
-        async for chunk in llm.astream(messages):
+        async for chunk in llm.astream(inference_messages):
             content = chunk.content
             # Extract plain text string if content is structured (e.g. list of dicts/objects)
             text_val = ""

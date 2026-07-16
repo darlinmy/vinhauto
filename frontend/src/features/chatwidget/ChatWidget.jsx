@@ -59,6 +59,15 @@ function ChatWidget({ apiUrl = window.location.origin }) {
       isStreaming: true,
     };
 
+    // Capture history before adding current query and placeholder (limit to last 10 messages)
+    const historyPayload = messages
+      .filter(msg => !msg.isStreaming)
+      .slice(-10)
+      .map(msg => ({
+        sender: msg.sender,
+        text: msg.text
+      }));
+
     setMessages((prev) => [...prev, userMessage, botMessagePlaceholder]);
     setIsTyping(true);
 
@@ -69,7 +78,10 @@ function ChatWidget({ apiUrl = window.location.origin }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: query }),
+        body: JSON.stringify({ 
+          message: query,
+          history: historyPayload
+        }),
       });
 
       if (!response.ok) {
