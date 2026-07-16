@@ -217,23 +217,7 @@ function ChatWidget({ apiUrl = window.location.origin }) {
                     )}
                   </div>
                   
-                  {/* Sources display */}
-                  {msg.sender === "bot" && msg.sources && msg.sources.length > 0 && (
-                    <div className="autodiag-sources-section">
-                      <div className="autodiag-sources-header">📄 Tài liệu tham khảo:</div>
-                      <div className="autodiag-sources-list">
-                        {msg.sources.map((src, idx) => (
-                          <div
-                            key={idx}
-                            className="autodiag-source-item"
-                            title={src.snippet}
-                          >
-                            <strong>{src.source}</strong> (Trang {src.page})
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+
                 </div>
               </div>
             ))}

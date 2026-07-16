@@ -7,8 +7,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
 
-# Load environment variables from .env
-load_dotenv()
+# Load environment variables from .env relative to the script directory
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
 # Define absolute paths based on project structure
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

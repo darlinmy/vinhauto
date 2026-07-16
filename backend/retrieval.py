@@ -68,8 +68,12 @@ llm = ChatGoogleGenerativeAI(
 
 # 4. Create RAG Prompts
 SYSTEM_PROMPT = (
-    "Bạn là một chuyên gia kỹ thuật ô tô. Hãy trả lời các câu hỏi của khách hàng dựa trên dữ liệu kỹ thuật được cung cấp.\n"
-    "Nếu thông tin không có trong tài liệu, hãy lịch sự hướng dẫn khách hàng liên hệ trực tiếp với kỹ thuật viên của garage.\n\n"
+    "Bạn là một chuyên gia kỹ thuật ô tô và trợ lý thông minh của garage Vinh Auto.\n"
+    "Nhiệm vụ của bạn là hỗ trợ khách hàng trả lời các câu hỏi về ô tô một cách nhiệt tình, chính xác và chuyên nghiệp.\n\n"
+    "Hướng dẫn trả lời:\n"
+    "1. Nếu câu hỏi liên quan đến thông tin kỹ thuật chi tiết của các dòng xe có trong dữ liệu tham khảo dưới đây, hãy ưu tiên sử dụng thông tin trong tài liệu đó.\n"
+    "2. Nếu câu hỏi là các câu hỏi cơ bản, câu hỏi xã giao (như chào hỏi, cảm ơn), hoặc các câu hỏi kiến thức chung về ô tô không nằm trong dữ liệu tham khảo, hãy sử dụng kiến thức chuyên môn rộng lớn của bạn về kỹ thuật ô tô để trả lời trực tiếp một cách đầy đủ và hữu ích cho khách hàng. Không được từ chối trả lời hoặc bắt khách hàng liên hệ kỹ thuật viên đối với các câu hỏi kiến thức chung này.\n"
+    "3. Chỉ khi khách hàng hỏi về các thông tin kỹ thuật quá đặc thù, sơ đồ mạch điện chi tiết, hoặc quy trình sửa chữa phức tạp của một dòng xe cụ thể mà KHÔNG có trong dữ liệu tham khảo, bạn mới lịch sự khuyên họ liên hệ trực tiếp với kỹ thuật viên của garage Vinh Auto để được hỗ trợ kiểm tra thực tế.\n\n"
     "Dữ liệu kỹ thuật tham khảo:\n"
     "---------------------\n"
     "{context}\n"
@@ -80,6 +84,29 @@ prompt_template = ChatPromptTemplate.from_messages([
     ("system", SYSTEM_PROMPT),
     ("human", "{question}")
 ])
+
+def is_conversational_query(query: str) -> bool:
+    """Detects if a query is a greeting, basic social message, or very short phrase to skip vector search."""
+    clean_query = query.strip().lower()
+    # Remove punctuation
+    clean_query = re.sub(r'[^\w\s]', '', clean_query)
+    
+    # Set of common Vietnamese and English greetings/conversational phrases
+    phrases = {
+        "chào", "xin chào", "chào bạn", "chào ad", "hello", "hi", "helo", "alo", "halô",
+        "cảm ơn", "cám ơn", "cảm ơn bạn", "thank", "thanks", "thank you",
+        "tạm biệt", "bye", "goodbye", "bạn là ai", "ai đấy", "tên bạn là gì",
+        "trợ giúp", "help", "ok", "okay", "ừ", "vâng", "dạ"
+    }
+    
+    if clean_query in phrases:
+        return True
+        
+    # Also skip if extremely short and doesn't look like an OBD-II error code (like P0101)
+    if len(clean_query) < 4 and not re.match(r'^[pcbu]\d', clean_query):
+        return True
+        
+    return False
 
 def format_docs(docs):
     """Formats list of retrieved documents into a clean string for the context prompt."""
@@ -115,7 +142,12 @@ async def stream_rag(question: str):
                 print(f"[+] Exact match found for OBD-II code: {code}")
 
         # B. Retrieve relevant documents from Chroma vector store (PDF manuals)
-        docs = await retriever.ainvoke(question)
+        # Skip vector DB retrieval for simple greetings/conversational queries to improve response speed
+        if is_conversational_query(question) and not obd_docs:
+            docs = []
+            print(f"[*] Conversational query detected: '{question}'. Skipping vector search.")
+        else:
+            docs = await retriever.ainvoke(question)
         
         # Combine both OBD-II lookup documents and PDF manual chunks
         all_docs = obd_docs + list(docs)
