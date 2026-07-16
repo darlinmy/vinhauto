@@ -1,0 +1,538 @@
+/* Elegant, Clean & Polite Navy-White Styling */
+:root {
+    --primary: #1e3a8a; /* Classic Royal Navy Blue - represents trust & reliability */
+    --primary-light: #3b82f6;
+    --primary-dark: #172554;
+    --bg-light: #f8fafc; /* Crisp off-white */
+    --bg-white: #ffffff;
+    --text-dark: #0f172a; /* Deep charcoal for high legibility */
+    --text-muted: #475569; /* Soft charcoal for secondary text */
+    --border-light: #e2e8f0; /* Soft gray border */
+    --accent: #b45309; /* Elegant warm bronze for accents */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.landing-page-container {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Header - Clean & Elegant Navigation */
+.landing-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 75px;
+    padding: 0 8%;
+    background: var(--bg-white);
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+}
+
+.landing-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.landing-logo span {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 0.5px;
+}
+
+.landing-logo-img {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+}
+
+.landing-nav {
+    display: flex;
+    align-items: center;
+}
+
+.landing-nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    margin: 0 18px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.landing-nav a:hover {
+    color: var(--primary);
+}
+
+.landing-header-btn {
+    background-color: var(--primary);
+    color: var(--bg-white);
+    border: none;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.landing-header-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+/* Hero Section - Warm, Welcoming & Professional */
+.landing-hero {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 140px 8% 80px 8%;
+    background-color: var(--bg-white);
+    position: relative;
+    border-bottom: 1px solid var(--border-light);
+}
+
+/* Subtle background graphic that doesn't look busy */
+.landing-hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.03), transparent 50%);
+    pointer-events: none;
+}
+
+.landing-hero-content {
+    max-width: 850px;
+    text-align: center;
+}
+
+.landing-hero h1 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1.2;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+}
+
+.landing-hero p {
+    font-size: 18px;
+    color: var(--text-muted);
+    margin-bottom: 36px;
+    line-height: 1.7;
+}
+
+.landing-hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.landing-cta-btn {
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.landing-cta-btn.btn-primary {
+    background-color: var(--primary);
+    color: var(--bg-white);
+    box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
+}
+
+.landing-cta-btn.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.landing-cta-btn.btn-secondary {
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    border: 1px solid var(--border-light);
+}
+
+.landing-cta-btn.btn-secondary:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+/* Core Commitments Section */
+.landing-commitments-section {
+    padding: 100px 8%;
+    background-color: var(--bg-light);
+}
+
+.landing-section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.landing-section-header h2 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 14px;
+}
+
+.landing-section-header p {
+    color: var(--text-muted);
+    font-size: 16px;
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+.landing-commitments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.landing-commitment-card {
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 35px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.landing-commitment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.commitment-icon-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    background-color: rgba(30, 58, 138, 0.06);
+    color: var(--primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.commitment-svg {
+    width: 26px;
+    height: 26px;
+}
+
+.landing-commitment-card h3 {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+}
+
+.landing-commitment-card p {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Services Grid Section */
+.landing-services-section {
+    padding: 100px 8%;
+    background-color: var(--bg-white);
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.landing-services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.landing-service-card {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 35px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.landing-service-card:hover {
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
+}
+
+.landing-service-icon-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    background-color: rgba(30, 58, 138, 0.06);
+    color: var(--primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.service-svg {
+    width: 24px;
+    height: 24px;
+}
+
+.landing-service-card h3 {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+}
+
+.landing-service-card p {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Contact Section - Organized & Dignified */
+.landing-contact-section {
+    padding: 100px 8%;
+    background-color: var(--bg-light);
+}
+
+.landing-contact-container {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.contact-info-block h2 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 12px;
+}
+
+.contact-subtext {
+    color: var(--text-muted);
+    font-size: 16px;
+    margin-bottom: 30px;
+}
+
+.contact-details {
+    margin-bottom: 36px;
+}
+
+.contact-details p {
+    font-size: 16px;
+    margin-bottom: 16px;
+    color: var(--text-dark);
+}
+
+.contact-details strong {
+    color: var(--primary);
+}
+
+.visual-garage-card {
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+}
+
+.visual-garage-card h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 12px;
+}
+
+.visual-garage-card p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+.garage-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 4px;
+    background-color: #d1fae5;
+    color: #065f46;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Clean, Dignified Footer */
+.landing-footer {
+    padding: 40px 8%;
+    background-color: var(--bg-white);
+    border-top: 1px solid var(--border-light);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   MEDIA QUERIES FOR RESPONSIVE DESIGN (MOBILE & TABLET)
+   ========================================================================== */
+
+/* Tablets & Small Laptops (under 1024px) */
+@media (max-width: 1024px) {
+    .landing-header {
+        padding: 0 5%;
+    }
+    .landing-hero h1 {
+        font-size: 40px;
+    }
+    .landing-contact-container {
+        grid-template-columns: 1fr;
+        gap: 45px;
+    }
+    .landing-services-section, 
+    .landing-commitments-section, 
+    .landing-contact-section {
+        padding: 80px 5%;
+    }
+}
+
+/* Mobile Devices (under 768px) */
+@media (max-width: 768px) {
+    .landing-header {
+        padding: 0 4%;
+    }
+    
+    .landing-logo span {
+        font-size: 19px;
+    }
+    
+    .landing-logo-img {
+        height: 36px;
+    }
+    
+    .landing-nav a {
+        margin: 0 10px;
+        font-size: 13px;
+    }
+    
+    .landing-header-btn {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+    
+    .landing-hero {
+        padding: 130px 5% 60px 5%;
+        min-height: auto;
+    }
+    
+    .landing-hero h1 {
+        font-size: 32px;
+    }
+    
+    .landing-hero p {
+        font-size: 16px;
+    }
+    
+    .landing-section-header h2, .contact-info-block h2 {
+        font-size: 28px;
+    }
+    
+    .landing-commitments-grid, .landing-services-grid {
+        gap: 20px;
+    }
+    
+    .landing-commitment-card, .landing-service-card {
+        padding: 25px;
+    }
+}
+
+/* Extra Small Mobile Devices (under 480px) */
+@media (max-width: 480px) {
+    .landing-header {
+        flex-direction: column;
+        height: auto;
+        padding: 12px 3%;
+        gap: 10px;
+    }
+    
+    .landing-logo {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .landing-nav {
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 4px;
+    }
+    
+    .landing-nav a {
+        margin: 0 8px;
+        font-size: 12px;
+    }
+    
+    .landing-header-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .landing-hero {
+        padding: 160px 4% 50px 4%;
+    }
+    
+    .landing-hero h1 {
+        font-size: 26px;
+    }
+    
+    .landing-hero p {
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+    
+    .landing-hero-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+    
+    .landing-cta-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .landing-services-section, 
+    .landing-commitments-section, 
+    .landing-contact-section {
+        padding: 60px 4%;
+    }
+    
+    .landing-section-header h2, .contact-info-block h2 {
+        font-size: 24px;
+    }
+}

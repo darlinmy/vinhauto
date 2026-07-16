@@ -1,0 +1,18 @@
+services:
+  autodiag-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autodiag_container
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    env_file:
+      - backend/.env
+    # Optional: mount directories for live-reload development
+    # volumes:
+    #   - ./backend:/app/backend
+    #   - ./frontend:/app/frontend
+    #   - ./data:/app/data
+    restart: unless-stopped
